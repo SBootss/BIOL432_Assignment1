@@ -1,0 +1,110 @@
+---
+title: "BIOL432 Assignment 1 Report"
+author: "Sam Boots"
+date: "January 13th 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+[GitHub repository for BIOL432 Assignment 1](https://github.com/SBootss/BIOL432_Assignment1)
+
+# Setup
+
+## Loading libraries
+Loading libraries for use in assignment:
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+## Loading default plotting theme
+```{r}
+source("http://bit.ly/theme_pub")
+theme_set(theme_pub())
+```
+
+# Generating data and estimating limb volume
+## R Script #1
+The folowing script creates a data frame of 100 randomly sampled values for each of the variables organism, limb-width, limb-length and observer. The data frame is then exported to a csv called 'measurements.csv'. 
+```{r}
+source('dataGenerato.R')
+```
+
+## R Script #2
+The following script adds a "Volume" column, estimating limb-volume from limb-width and limb-length with the assumption that the organism's limbs are cylindrical. The script overrides the original measurements.csv file with the new one including volume estimates.
+```{r}
+source('volumeEstimato.R')
+```
+
+# Loading data
+Importing limb volume data from measurements.csv:
+
+```{r}
+LimbData<-read.csv("measurements.csv")
+```
+
+# Sorting data using dplyr
+
+By species:
+
+```{r}
+LimbData %>%
+  arrange(Organism)
+```
+By observer:
+
+```{r}
+LimbData %>%
+  arrange(Observer)
+```
+By limb volume:
+
+```{r}
+LimbData %>%
+  arrange(Volume)
+```
+# Creating summary tables
+A table showing average limb-volume by species:
+```{r}
+LimbVolSpecAvg<-LimbData %>%
+  group_by(Organism) %>%
+  summarise("Average Limb Volume (cm^3)"=mean(Volume))
+
+LimbVolSpecAvg
+```
+A table showing number of observations for each combination of species and observer:
+```{r}
+LimbVolSpObCount<-LimbData %>%
+  count(Organism, Observer)
+
+LimbVolSpObCount
+```
+# Figures summarizing limb volume data
+
+## Box plot comparing limb volumes between species
+```{r}
+VolBoxPlot<-ggplot(LimbData, aes(Organism, Volume, fill=Organism)) +
+  geom_boxplot()+
+  labs(x="Species", y=expression(Limb~Volume~(cm^3)))+ scale_y_continuous(limits=c(0,5000),breaks= seq(0,5000, by=500))+
+   theme(axis.ticks=element_line(), axis.text.x=element_text(face="italic"))
+  
+
+VolBoxPlot
+```
+
+## Frequency histograms of limb volume for each species
+
+```{r}
+FreqHist<-ggplot(LimbData, aes(x=Volume, fill=Organism))+
+  geom_histogram(binwidth=500)+
+  labs(x=expression(Limb~Volume~(cm^3)),y="Frequency")+
+  scale_y_continuous(limits=c(0,10),
+                     breaks=seq(0,10, by=2))+
+  theme(axis.ticks=element_line(), strip.text=element_text(face="italic"))+
+  facet_grid(.~Organism)
+
+FreqHist
+```
+
