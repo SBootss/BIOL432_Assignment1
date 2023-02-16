@@ -1,0 +1,47 @@
+---
+title: "BIOL432 Assignment 5 Report"
+author: "Sam Boots"
+date: "February 15th 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+[GitHub repository](https://github.com/SBootss/BIOL432_Assignment1)
+
+# Setup
+
+## Loading Libraries
+```{r}
+library(dplyr) # data management
+```
+
+## Loading Data
+```{r}
+MData<-read.csv("measurements.csv") # importing CSV of limb measurement data
+```
+
+
+# Modifying and creating new dataset using dplyr and regular expressions
+
+Modifying dataset to add new column, Sp, with shortened Genus name:
+```{r}
+MData %>%
+  mutate(Sp=sub("(\\w\\w)\\w+","\\1\\.",Organism)) -> MData # make new column Sp, where genus name is shortened to first two characters with a period.
+```
+
+Making new dataset where Organism column is replaced by Sp, and the Sp column is in the location of the original Organism column:
+```{r}
+MData %>% 
+  select(-1) %>%
+  relocate(Sp) -> MDataSp
+# organism column removed, Sp column relocated, new data set object created
+```
+
+Saving new dataset as a csv file:
+```{r}
+write.csv(MDataSp, "MeasShort.csv")
+```
+
